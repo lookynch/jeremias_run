@@ -1,0 +1,88 @@
+{
+  "name": "Jeremias Runner Game",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "jeremias-run",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "3a4d7e8f-1b2c-4d5e-8f9a-0b1c2d3e4f5g",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "jeremias-run-game"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Load the HTML game file\nconst fs = require('fs');\nconst path = require('path');\n\n// Read the HTML file (adjust path as needed)\nconst htmlContent = `<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Jeremias Runner 👑</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body {\n            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 50%, #F4E4C1 100%);\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: center;\n            min-height: 100vh;\n            font-family: 'Arial', sans-serif;\n            overflow: hidden;\n        }\n        .game-container {\n            position: relative;\n            background: white;\n            border-radius: 20px;\n            box-shadow: 0 10px 40px rgba(0,0,0,0.3);\n            padding: 20px;\n            margin: 20px;\n        }\n        canvas {\n            display: block;\n            border: 3px solid #2c3e50;\n            border-radius: 10px;\n            background: linear-gradient(to bottom, #87CEEB 0%, #F4E4C1 70%);\n        }\n        .title {\n            text-align: center;\n            margin-bottom: 10px;\n            color: #2c3e50;\n            font-size: 32px;\n            font-weight: bold;\n            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);\n        }\n        .title .crown { color: #FFD700; font-size: 40px; }\n        .score-board {\n            display: flex;\n            justify-content: space-between;\n            margin-top: 15px;\n            padding: 10px;\n            background: #34495e;\n            border-radius: 10px;\n            color: white;\n            font-size: 18px;\n        }\n        .score-item { display: flex; align-items: center; gap: 8px; }\n        .coin-icon {\n            width: 24px; height: 24px;\n            background: radial-gradient(circle, #FFD700, #FFA500);\n            border-radius: 50%;\n            display: inline-flex;\n            align-items: center;\n            justify-content: center;\n            font-weight: bold;\n            color: #333;\n            font-size: 14px;\n            border: 2px solid #B8860B;\n        }\n        .controls { text-align: center; margin-top: 15px; color: #555; font-size: 14px; }\n        .controls strong { color: #2c3e50; }\n        .game-over-overlay {\n            position: absolute;\n            top: 50%; left: 50%;\n            transform: translate(-50%, -50%);\n            background: rgba(0, 0, 0, 0.9);\n            color: white;\n            padding: 40px;\n            border-radius: 20px;\n            text-align: center;\n            display: none;\n            z-index: 10;\n            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);\n        }\n        .game-over-overlay.active { display: block; }\n        .game-over-overlay h2 { font-size: 48px; margin-bottom: 20px; color: #FFD700; }\n        .game-over-overlay .final-score { font-size: 24px; margin-bottom: 30px; }\n        .game-over-overlay button {\n            background: linear-gradient(to bottom, #4CAF50, #45a049);\n            color: white; border: none;\n            padding: 15px 40px;\n            font-size: 20px;\n            border-radius: 10px;\n            cursor: pointer;\n            transition: all 0.3s;\n            box-shadow: 0 4px 6px rgba(0,0,0,0.3);\n        }\n        .game-over-overlay button:hover {\n            transform: scale(1.05);\n            box-shadow: 0 6px 12px rgba(0,0,0,0.4);\n        }\n        .credits { text-align: center; margin-top: 10px; color: #7f8c8d; font-size: 12px; }\n    </style>\n</head>\n<body>\n    <div class=\"game-container\">\n        <div class=\"title\"><span class=\"crown\">👑</span> JEREMIAS RUNNER</div>\n        <canvas id=\"gameCanvas\" width=\"800\" height=\"400\"></canvas>\n        <div class=\"score-board\">\n            <div class=\"score-item\"><span>🏃</span><span>Score: <strong id=\"currentScore\">0</strong></span></div>\n            <div class=\"score-item\"><div class=\"coin-icon\">J</div><span>Münzen: <strong id=\"coinCount\">0</strong></span></div>\n            <div class=\"score-item\"><span>👑</span><span>High Score: <strong id=\"highScore\">0</strong></span></div>\n        </div>\n        <div class=\"controls\"><strong>Steuerung:</strong> Leertaste / ↑ = Springen | ↓ = Ducken | R = Neustart</div>\n        <div class=\"game-over-overlay\" id=\"gameOverOverlay\">\n            <h2>GAME OVER</h2>\n            <div class=\"final-score\">\n                <p>Dein Score: <strong id=\"finalScore\">0</strong></p>\n                <p>Münzen: <strong id=\"finalCoins\">0</strong></p>\n            </div>\n            <button onclick=\"restartGame()\">NOCHMAL SPIELEN</button>\n        </div>\n        <div class=\"credits\">© 2026 Jeremias Abgastechnik | Powered by OpenClaw 🤖</div>\n    </div>\n    <script>\n        const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');let gameRunning=!0,score=0,coins=0,highScore=localStorage.getItem('jeremiasRunnerHighScore')||0,gameSpeed=6,gravity=.8,frameCount=0;document.getElementById('highScore').textContent=highScore;const player={x:100,y:260,width:50,height:80,velocityY:0,jumping:!1,ducking:!1,draw(){ctx.save(),this.ducking?(this.height=50,this.y=290):(this.height=80,this.y=260),ctx.fillStyle='#2c3e50',ctx.font='bold 60px Arial',ctx.textAlign='center',ctx.textBaseline='bottom';const t=Math.sin(.2*frameCount)*2;ctx.fillText('J',this.x+25,this.y+this.height-10+t),ctx.font='30px Arial',ctx.fillText('👑',this.x+25,this.y-5+t),ctx.strokeStyle='#2c3e50',ctx.lineWidth=4,!this.jumping&&!this.ducking&&(t=Math.sin(.3*frameCount)*10,ctx.beginPath(),ctx.moveTo(this.x+20,this.y+this.height),ctx.lineTo(this.x+15+t,this.y+this.height+15),ctx.stroke(),ctx.beginPath(),ctx.moveTo(this.x+30,this.y+this.height),ctx.lineTo(this.x+35-t,this.y+this.height+15),ctx.stroke()),ctx.restore()},jump(){this.jumping||(this.velocityY=-15,this.jumping=!0)},update(){this.jumping&&(this.velocityY+=gravity,this.y+=this.velocityY,260<=this.y&&(this.y=260,this.velocityY=0,this.jumping=!1))}};class Obstacle{constructor(){this.width=30+60*Math.random(),this.height=50+40*Math.random(),this.x=canvas.width,this.y=340-this.height,this.type=.5<Math.random()?'cactus':'cloud','cloud'===this.type&&(this.y=200+50*Math.random(),this.height=40)}draw(){ctx.fillStyle='cactus'===this.type?'#27ae60':'#95a5a6','cactus'===this.type?(ctx.fillRect(this.x+10,this.y,20,this.height),ctx.fillRect(this.x,this.y+15,15,25),ctx.fillRect(this.x+25,this.y+20,15,20)):(ctx.beginPath(),ctx.arc(this.x,this.y,this.height/2,0,2*Math.PI),ctx.arc(this.x+20,this.y-5,this.height/2.5,0,2*Math.PI),ctx.arc(this.x+35,this.y,this.height/3,0,2*Math.PI),ctx.fill())}update(){this.x-=gameSpeed}}class Coin{constructor(){this.radius=15,this.x=canvas.width,this.y=200+100*Math.random(),this.collected=!1,this.rotation=0}draw(){this.collected||(ctx.save(),ctx.translate(this.x,this.y),ctx.rotate(this.rotation),ctx.fillStyle='#FFD700',ctx.beginPath(),ctx.arc(0,0,this.radius,0,2*Math.PI),ctx.fill(),ctx.strokeStyle='#B8860B',ctx.lineWidth=3,ctx.stroke(),ctx.fillStyle='#2c3e50',ctx.font='bold 20px Arial',ctx.textAlign='center',ctx.textBaseline='middle',ctx.fillText('J',0,0),ctx.restore())}update(){this.x-=gameSpeed,this.rotation+=.1}checkCollision(t){if(this.collected)return!1;const e=this.x-(t.x+t.width/2),i=this.y-(t.y+t.height/2);return Math.sqrt(e*e+i*i)<this.radius+25&&(this.collected=!0,!0)}}let obstacles=[],coinsArray=[];function spawnObstacle(){frameCount%90==0&&obstacles.push(new Obstacle)}function spawnCoin(){frameCount%150==0&&.3<Math.random()&&coinsArray.push(new Coin)}function checkCollision(t){return'cloud'===t.type&&player.y<280?player.x<t.x+t.width&&player.x+player.width>t.x&&player.y<t.y+t.height&&player.y+40>t.y:'cactus'===t.type&&player.x+10<t.x+t.width&&player.x+player.width-10>t.x&&player.y+player.height-10>t.y}function drawGround(){ctx.fillStyle='#8B4513',ctx.fillRect(0,340,canvas.width,2),ctx.fillStyle='#D2B48C';for(let t=0;t<canvas.width;t+=40)ctx.fillRect(t-frameCount%40,342,20,58)}function drawBackground(){ctx.fillStyle='rgba(255, 255, 255, 0.7)';const t=.5*frameCount%canvas.width;for(let e=-canvas.width;e<2*canvas.width;e+=200)ctx.beginPath(),ctx.arc(e-t,80,30,0,2*Math.PI),ctx.arc(e-t+40,75,40,0,2*Math.PI),ctx.arc(e-t+80,80,30,0,2*Math.PI),ctx.fill()}function updateScore(){frameCount%10==0&&(score++,document.getElementById('currentScore').textContent=score),document.getElementById('coinCount').textContent=coins}function gameOver(){gameRunning=!1,highScore<score&&(highScore=score,localStorage.setItem('jeremiasRunnerHighScore',highScore),document.getElementById('highScore').textContent=highScore),document.getElementById('finalScore').textContent=score,document.getElementById('finalCoins').textContent=coins,document.getElementById('gameOverOverlay').classList.add('active')}function restartGame(){gameRunning=!0,score=0,coins=0,gameSpeed=6,frameCount=0,obstacles=[],coinsArray=[],player.y=260,player.velocityY=0,player.jumping=!1,player.ducking=!1,document.getElementById('currentScore').textContent=0,document.getElementById('coinCount').textContent=0,document.getElementById('gameOverOverlay').classList.remove('active'),gameLoop()}function gameLoop(){if(gameRunning){ctx.clearRect(0,0,canvas.width,canvas.height),drawBackground(),drawGround(),player.update(),player.draw(),spawnObstacle();for(let t=obstacles.length-1;0<=t;t--)if(obstacles[t].update(),obstacles[t].draw(),checkCollision(obstacles[t]))return void gameOver();spawnCoin();for(let t=coinsArray.length-1;0<=t;t--)coinsArray[t].update(),coinsArray[t].draw(),coinsArray[t].checkCollision(player)&&(coins++,score+=10),coinsArray[t].x<-50&&coinsArray.splice(t,1);updateScore(),frameCount%500==0&&(gameSpeed+=.5),frameCount++,requestAnimationFrame(gameLoop)}}document.addEventListener('keydown',e=>{gameRunning||'KeyR'!==e.code||restartGame(),gameRunning&&('Space'!==e.code&&'ArrowUp'!==e.code||(e.preventDefault(),player.jump()),'ArrowDown'===e.code&&(e.preventDefault(),player.ducking=!0))}),document.addEventListener('keyup',e=>{'ArrowDown'===e.code&&(player.ducking=!1)}),canvas.addEventListener('touchstart',e=>{e.preventDefault(),gameRunning?player.jump():restartGame()}),gameLoop();\n    </script>\n</body>\n</html>`;\n\nreturn { html: htmlContent };"
+      },
+      "id": "5b6c8d9e-2a3b-4c5d-9e0a-1b2c3d4e5f6g",
+      "name": "Generate HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "public, max-age=3600"
+              }
+            ]
+          }
+        },
+        "responseBody": "={{ $json.html }}"
+      },
+      "id": "6c7d9e0f-3a4b-5c6d-0e1a-2b3c4d5e6f7g",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HTML": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "jeremias-runner-game",
+  "meta": {
+    "instanceId": "your-n8n-instance-id"
+  },
+  "tags": []
+}
