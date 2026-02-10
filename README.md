@@ -11,15 +11,29 @@
 
 ## 🎮 Features
 
-✨ **Jeremias J-Charakter** mit königlicher Krone als i-Punkt  
-🪙 **Sammelbare Münzen** mit Jeremias-Logo (J-Prägung)  
-🌵 **Hindernisse:** Kakteen & Abgas-Wolken (thematisch passend!)  
-📊 **Score-System:** Zeit + Münzen = Punkte  
+✨ **Professioneller J-Charakter** mit detaillierter Krone und 3D-Effekten  
+🏭 **Jeremias-Schornsteine** als Hindernisse (mit Rauch-Animation!)  
+🪙 **Sammelbare Münzen** mit Jeremias-Logo (J-Prägung) und Sparkle-Effekt  
+📊 **Progressive Schwierigkeit:** Startet einfach, wird graduell härter  
+🎯 **Optimierte Hitboxen:** Faire Kollisions-Erkennung  
 👑 **High Score:** Lokal gespeichert via localStorage  
 📱 **Responsive:** Funktioniert auf Desktop & Mobile  
-🎨 **Grafisch ansprechend:** Animationen, Gradients, Schatten  
+🎨 **Grafisch hochwertig:** 3D-Gradienten, Schatten, Animationen  
 ⚡ **Single-Page:** Komplettes Spiel in einer HTML-Datei  
 🔗 **n8n-Ready:** Kann direkt in n8n gehostet werden
+
+---
+
+## 🆕 Version 2.1 - Optimierungen
+
+**Neue Features:**
+- ⚡ **Progressive Schwierigkeit:** Spiel startet bei Speed 4 und steigt bis 12
+- 🎯 **Optimierte Münz-Platzierung:** Keine unmöglichen Münzen mehr
+- 🎨 **Verbesserter Charakter:** 3D-Gradienten, Schatten, detaillierte Krone mit Juwelen
+- 🔧 **Faire Hitboxen:** Kleiner als Visual für faireres Gameplay
+- 🏭 **Bessere Schornsteine:** Realistischere Grafik mit Rauch-Animation
+
+[Siehe CHANGELOG.md für Details](CHANGELOG.md)
 
 ---
 
